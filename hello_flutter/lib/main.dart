@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -34,11 +36,13 @@ class MyApp extends StatelessWidget {
                   ),
                 ),
                 TextField(
+                  onChanged: (value) => {print(value)},
                   decoration: InputDecoration(labelText: "E-MAIL"),
                 ),
                 TextField(
                   decoration: InputDecoration(labelText: "PASSWORD"),
                   obscureText: true,
+                  onChanged: (value) => {print(value)},
                 ),
                 Container(
                   width: double.infinity,
