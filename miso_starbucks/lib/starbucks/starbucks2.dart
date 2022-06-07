@@ -59,7 +59,7 @@ class Starbucks2 extends StatelessWidget {
               },
             ),
           ),
-          Container(
+          SizedBox(
             height: 72,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
