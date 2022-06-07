@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:miso_starbucks/miso/miso_main.dart';
+import 'package:miso_starbucks/starbucks/starbucks_main.dart';
 
 void main() {
   runApp(MyApp());
@@ -47,7 +48,14 @@ class Home extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StartBucksMain(),
+                  ),
+                );
+              },
               child: Text("Starbucks"),
             ),
           ),
