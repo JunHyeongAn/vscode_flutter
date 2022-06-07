@@ -24,7 +24,7 @@ class _MisoMainState extends State<MisoMain> {
         children: [
           Miso1(mainColor: misoPrimaryColor),
           Miso2(mainColor: misoPrimaryColor),
-          Miso3(),
+          Miso3(mainColor: misoPrimaryColor),
           Miso4(),
         ],
       ),
