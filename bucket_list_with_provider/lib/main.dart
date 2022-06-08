@@ -1,9 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'bucket_service.dart';
 
 void main() {
   runApp(
-    const MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => BucketService()),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
@@ -33,21 +41,57 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("버킷 리스트"),
-      ),
-      body: Center(child: Text("버킷 리스트를 작성해 주세요.")),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          // + 버튼 클릭시 버킷 생성 페이지로 이동
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => CreatePage()),
-          );
-        },
-      ),
+    return Consumer<BucketService>(
+      builder: (context, bucketService, child) {
+        List<Bucket> bucketList = bucketService.bucketList;
+        return Scaffold(
+          appBar: AppBar(
+            title: Text("버킷 리스트"),
+          ),
+          body: bucketList.isEmpty
+              ? Center(child: Text("버킷 리스트를 작성해 주세요."))
+              : ListView.builder(
+                  itemCount: bucketList.length, // bucketList 개수 만큼 보여주기
+                  itemBuilder: (context, index) {
+                    var bucket = bucketList[index]; // index에 해당하는 bucket 가져오기
+                    return ListTile(
+                      // 버킷 리스트 할 일
+                      title: Text(
+                        bucket.job,
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: bucket.isDone ? Colors.grey : Colors.black,
+                          decoration: bucket.isDone
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                        ),
+                      ),
+                      // 삭제 아이콘 버튼
+                      trailing: IconButton(
+                        icon: Icon(CupertinoIcons.delete),
+                        onPressed: () {
+                          bucketService.deleteBucket(bucket);
+                        },
+                      ),
+                      onTap: () {
+                        bucket.isDone = !bucket.isDone;
+                        bucketService.updateBucket(bucket, index);
+                      },
+                    );
+                  },
+                ),
+          floatingActionButton: FloatingActionButton(
+            child: Icon(Icons.add),
+            onPressed: () {
+              // + 버튼 클릭시 버킷 생성 페이지로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => CreatePage()),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -116,6 +160,8 @@ class _CreatePageState extends State<CreatePage> {
                     setState(() {
                       error = null; // 내용이 있는 경우 에러 메세지 숨기기
                     });
+                    BucketService bucketService = context.read<BucketService>();
+                    bucketService.createBucket(job);
                     Navigator.pop(context); // 화면을 종료합니다.
                   }
                 },
