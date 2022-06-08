@@ -23,13 +23,13 @@ class Starbucks2 extends StatelessWidget {
           ),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 15),
-            child: Icon(
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
               CupertinoIcons.line_horizontal_3,
               color: Colors.grey.withOpacity(0.8),
             ),
-          ),
+          )
         ],
       ),
       body: Column(
