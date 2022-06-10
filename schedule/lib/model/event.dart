@@ -1,5 +1,5 @@
 class Event {
-  String event;
+  String? event;
   DateTime regDate;
 
   Event(this.event, this.regDate);
