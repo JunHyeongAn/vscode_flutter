@@ -1,115 +1,219 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  // main() 함수에서 async를 쓰려면 필요
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // shared_preferences 인스턴스 생성
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => CatService(prefs)),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      debugShowCheckedModeBanner: false,
+      home: HomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+/// 고양이 서비스
+class CatService extends ChangeNotifier {
+  // 고양이 사진 담을 변수
+  List<String> catImages = [];
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+  // 좋아한 사진
+  List<String> favoriteCatImages = [];
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  SharedPreferences prefs;
 
-  final String title;
+  CatService(this.prefs) {
+    favoriteCatImages = prefs.getStringList("favorites") ?? [];
+    getRandomCatImages();
+  }
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  void getRandomCatImages() async {
+    String limit = "10";
+    String mimeType = "jpg";
+    Response result = await Dio().get(
+        "https://api.thecatapi.com/v1/images/search?" +
+            "limit=$limit&mime_types=$mimeType");
+    for (var i = 0; i < result.data.length; i++) {
+      var map = result.data[i];
+      catImages.add(map["url"]);
+    }
+    notifyListeners();
+  }
+
+  void toggleFavoriteImage(String catImage) {
+    if (favoriteCatImages.contains(catImage)) {
+      favoriteCatImages.remove(catImage);
+    } else {
+      favoriteCatImages.add(catImage);
+    }
+    prefs.setStringList("favorites", favoriteCatImages);
+    notifyListeners();
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+/// 홈 페이지
+class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+    return Consumer<CatService>(
+      builder: (context, catService, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "랜덤 고양이",
+              style: TextStyle(
+                color: Colors.black,
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            backgroundColor: Colors.white,
+            actions: [
+              // 좋아요 페이지로 이동
+              IconButton(
+                icon: Icon(
+                  Icons.favorite,
+                  color: Colors.pink,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FavoritePage()),
+                  );
+                },
+              )
+            ],
+          ),
+          // 고양이 사진 목록
+          body: GridView.count(
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            padding: EdgeInsets.all(8),
+            crossAxisCount: 2,
+            children: List.generate(
+              catService.catImages.length,
+              (index) {
+                String catImageUrl = catService.catImages[index];
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Image.network(
+                        catImageUrl,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned(
+                      right: 2,
+                      bottom: 2,
+                      child: IconButton(
+                        onPressed: () {
+                          catService.toggleFavoriteImage(catImageUrl);
+                        },
+                        icon: Icon(
+                          catService.favoriteCatImages.contains(catImageUrl)
+                              ? Icons.favorite
+                              : Icons.favorite_outline,
+                          color:
+                              catService.favoriteCatImages.contains(catImageUrl)
+                                  ? Colors.pink
+                                  : Colors.white,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 좋아요 페이지
+class FavoritePage extends StatelessWidget {
+  const FavoritePage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<CatService>(
+      builder: (context, catService, child) {
+        return Scaffold(
+          appBar: AppBar(
+            iconTheme: IconThemeData(
+              color: Colors.black,
+            ),
+            title: Text(
+              "좋아요",
+              style: TextStyle(color: Colors.black),
+            ),
+            backgroundColor: Colors.white,
+          ),
+          body: GridView.count(
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            padding: EdgeInsets.all(8),
+            crossAxisCount: 2,
+            children: List.generate(
+              catService.favoriteCatImages.length,
+              (index) {
+                String catImageUrl = catService.favoriteCatImages[index];
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Image.network(
+                        catImageUrl,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned(
+                      right: 2,
+                      bottom: 2,
+                      child: IconButton(
+                        onPressed: () {
+                          catService.toggleFavoriteImage(catImageUrl);
+                        },
+                        icon: Icon(
+                          catService.favoriteCatImages.contains(catImageUrl)
+                              ? Icons.favorite
+                              : Icons.favorite_outline,
+                          color:
+                              catService.favoriteCatImages.contains(catImageUrl)
+                                  ? Colors.pink
+                                  : Colors.white,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }
