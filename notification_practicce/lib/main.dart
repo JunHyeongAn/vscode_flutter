@@ -12,24 +12,28 @@ void main() async {
   initNotification();
   String? token = await messaging.getToken();
 
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    announcement: false,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
-  );
-
   FirebaseMessaging.onMessage.listen((RemoteMessage rm) {
-    print("listen");
-    print(rm.notification!.title);
-    print(rm.notification!.body);
-    showNotification();
-  });
+    String image = rm.data["image"] ?? "";
+    String? title = rm.notification!.title;
+    String? body = rm.notification!.body;
 
-  print('User granted permission: ${settings.authorizationStatus}');
+    if (image.isNotEmpty) {
+      showBigPictureNotificationURL(
+        image,
+        1,
+        title,
+        body,
+      );
+    } else {
+      showNotification(
+        "channelId",
+        "description",
+        1,
+        title,
+        body,
+      );
+    }
+  });
   print(token);
   runApp(MyApp());
 }
@@ -45,13 +49,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-  }
-
-  void firebaseCloudMessaging_Listners() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage rm) {
-      print("listen");
-      print(rm);
-    });
   }
 
   @override
