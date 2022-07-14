@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "387812019816",
+    "project_id": "notification-practice-bf0e9",
+    "storage_bucket": "notification-practice-bf0e9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:387812019816:android:7118520a7698db3665f5dd",
+        "android_client_info": {
+          "package_name": "com.example.notification_practicce"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "387812019816-pfl2778lmt41fncj9nemtcg1r9n9eieh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLCEaNRCq3nLeNQAxN2JloHl-1xMKuUic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "387812019816-pfl2778lmt41fncj9nemtcg1r9n9eieh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "387812019816-3g9ul4fpb2f2hbi0pjrk1b89cotpl1an.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.notificationPracticce"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
