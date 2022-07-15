@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_state.dart';
-import 'package:get/instance_manager.dart';
-import 'package:get/route_manager.dart';
 import 'package:getx_practice/controller/count_controller_obs.dart';
 
 import 'controller/count_controller.dart';
