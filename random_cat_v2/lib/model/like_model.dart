@@ -1,7 +1,9 @@
 import 'package:hive/hive.dart';
 
-@HiveType(typeId: 1)
-class Cat {
+part 'like_model.g.dart';
+
+@HiveType(typeId: 2)
+class Like {
   @HiveField(0)
   String? id;
 
@@ -9,13 +11,12 @@ class Cat {
   String? url;
 
   @HiveField(2)
-  bool isLike = false;
-
-  Cat.no();
-  Cat(this.id, this.url, this.isLike);
+  bool? isLike;
 
   @override
   String toString() {
-    return '$id : $isLike';
+    return '$id : $url';
   }
+
+  Like(this.id, this.url, this.isLike);
 }
